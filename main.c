@@ -11,7 +11,7 @@ int main(int argc, char ** argv){
   int *n_elements;
   int *receive;
 
-  printf("ciao");
+  
 
   MPI_Init(&argc, &argv);
   MPI_Comm_rank(MPI_COMM_WORLD, &rank);
