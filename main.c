@@ -52,7 +52,11 @@ int main(int argc, char ** argv){
       if(a[i]<min)
         min=a[i];
     }
+
+  receive = (int *)malloc((max-min+1)*sizeof(int));
   }
+
+  
 
   MPI_Bcast(&max, 1, MPI_INT, 0, MPI_COMM_WORLD);
   MPI_Bcast(&min, 1, MPI_INT, 0, MPI_COMM_WORLD);
@@ -76,11 +80,11 @@ int main(int argc, char ** argv){
   for (i = 0; i < sendcnts[rank]; i++)
   c[a_chunk[i] - min] += 1;
 
-  MPI_Reduce(c, c, max-min+1, MPI_INT, MPI_SUM, 0, MPI_COMM_WORLD);
+  MPI_Reduce(c, receive, max-min+1, MPI_INT, MPI_SUM, 0, MPI_COMM_WORLD);
 
   if(rank == 0){
     for(i=0; i<max-min+1; i++)
-      printf("%d ", c[i]);
+      printf("%d ", receive[i]);
   }
   /*
   int k = 0;
