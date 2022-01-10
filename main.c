@@ -27,7 +27,7 @@ int main(int argc, char ** argv){
   for(i=0; i<n_ranks; i++){
     displ[i] = i*count;
     if(i == n_ranks-1)
-      sendcnts[i] = count + N%n_ranks;
+      sendcnts[i] = count + N % n_ranks;
     else
       sendcnts[i] = count;
   }
