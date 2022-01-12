@@ -35,6 +35,8 @@ int main(int argc, char **argv)
 
 
 /*-----------------------------------------------INIZIALIZZAZIONE--------------------------------------*/
+    double start_inizializzazione = MPI_Wtime();
+
     quoz = N / n_ranks;
 
     // L'inizializzazione randomica del vettore viene equamente distribuita tra i processi
@@ -64,11 +66,15 @@ int main(int argc, char **argv)
     }
 
     MPI_Gatherv(piece_of_vector, dim, MPI_INT, full_vector, recvcounts, displ, MPI_INT, 0, MPI_COMM_WORLD);
+
+    double end_inizializzazione = MPI_Wtime();
 /*-----------------------------------------------------------------------------------------------------*/
 
 
 
 /*-------------------------------MIN E MAX-------------------------------------------------------------*/
+    double start_counting_sort = MPI_Wtime();
+
     piece_of_vector = (int *)malloc(dim * sizeof(int));
     for (i = 0; i < dim; i++)
     {
@@ -146,6 +152,7 @@ int main(int argc, char **argv)
             full_vector[x] = j + min;
         }
     }
+double end_counting_sort = MPI_Wtime(); //eventualmente da spostare sotto le free() quando si toglierà la stampa sottostante
 /*-----------------------------------------------------------------------------------------------------*/
 
     for(i=0; i<N; i++){
