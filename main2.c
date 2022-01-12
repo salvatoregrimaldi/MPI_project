@@ -152,6 +152,7 @@ int main(int argc, char **argv)
             full_vector[x] = j + min;
         }
     }
+    
 double end_counting_sort = MPI_Wtime(); //eventualmente da spostare sotto le free() quando si toglierà la stampa sottostante
 /*-----------------------------------------------------------------------------------------------------*/
 
