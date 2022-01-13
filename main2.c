@@ -65,6 +65,12 @@ int main(int argc, char **argv)
             recvcounts[i] = quoz;
     }
 
+    piece_of_vector = (int *)malloc(dim * sizeof(int));
+
+    for (i = 0; i < dim; i++)
+        piece_of_vector[i] = rand() % 700;
+    
+    MPI_Gatherv(piece_of_vector, dim, MPI_INT, full_vector, recvcounts, displ, MPI_INT, 0, MPI_COMM_WORLD);
 
     double end_inizializzazione = MPI_Wtime();
 /*-----------------------------------------------------------------------------------------------------*/
@@ -74,10 +80,8 @@ int main(int argc, char **argv)
 /*-------------------------------MIN E MAX-------------------------------------------------------------*/
     double start_counting_sort = MPI_Wtime();
 
-    piece_of_vector = (int *)malloc(dim * sizeof(int));
     for (i = 0; i < dim; i++)
     {
-        piece_of_vector[i] = rand() % 700;
         if (piece_of_vector[i] < local_min)
             local_min = piece_of_vector[i];
         else if (piece_of_vector[i] > local_max)
@@ -92,7 +96,6 @@ int main(int argc, char **argv)
     printf("max = %d\n", local_max);
     printf("\n\n");*/
 
-    MPI_Gatherv(piece_of_vector, dim, MPI_INT, full_vector, recvcounts, displ, MPI_INT, 0, MPI_COMM_WORLD);
 
     MPI_Allreduce(&local_min, &min, 1, MPI_INT, MPI_MIN, MPI_COMM_WORLD);
     MPI_Allreduce(&local_max, &max, 1, MPI_INT, MPI_MAX, MPI_COMM_WORLD);
