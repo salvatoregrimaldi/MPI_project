@@ -23,62 +23,43 @@ int main(int argc, char **argv)
     int *recvcounts;
     int *displ;
     int lenC;
-    int quoz;
 
     // inizializzazione ambiente MPI
     MPI_Init(&argc, &argv);
     MPI_Comm_rank(MPI_COMM_WORLD, &rank);
     MPI_Comm_size(MPI_COMM_WORLD, &n_ranks);
 
-    // Stampa del numero di ranks
-    printf("%d", n_ranks);
-
-
-/*-----------------------------------------------INIZIALIZZAZIONE--------------------------------------*/
-    double start_inizializzazione = MPI_Wtime();
-
-    quoz = N / n_ranks;
-
     // L'inizializzazione randomica del vettore viene equamente distribuita tra i processi
+
     if (rank == 0)
     {
         // il proc. 0 alloca lo spazio necessario per l'intero vettore
         full_vector = (int *)malloc(N * sizeof(int));
-        dim = quoz;
+        dim = N / n_ranks;
     }
 
     if (rank > 0 && rank < n_ranks - 1)
-        dim = quoz;
+        dim = N / n_ranks;
 
     if (rank == n_ranks - 1)
-        dim = quoz + N % n_ranks;
+        dim = N / n_ranks + N % n_ranks;
 
     recvcounts = (int *)malloc(n_ranks * sizeof(int));
     displ = (int *)malloc(n_ranks * sizeof(int));
     for (i = 0; i < n_ranks; i++)
     {
-        displ[i] = i * quoz;
+        displ[i] = i * (N / n_ranks);
         // printf("displ[%d] = %d\n", i, displ[i]);
         if (i == n_ranks - 1)
-            recvcounts[i] = quoz + N % n_ranks;
+            recvcounts[i] = (N / n_ranks) + N % n_ranks;
         else
-            recvcounts[i] = quoz;
+            recvcounts[i] = N / n_ranks;
     }
-
-    MPI_Gatherv(piece_of_vector, dim, MPI_INT, full_vector, recvcounts, displ, MPI_INT, 0, MPI_COMM_WORLD);
-
-    double end_inizializzazione = MPI_Wtime();
-/*-----------------------------------------------------------------------------------------------------*/
-
-
-
-/*-------------------------------MIN E MAX-------------------------------------------------------------*/
-    double start_counting_sort = MPI_Wtime();
 
     piece_of_vector = (int *)malloc(dim * sizeof(int));
     for (i = 0; i < dim; i++)
     {
-        piece_of_vector[i] = rand() % 700;
+        piece_of_vector[i] = rand() % 16;
         if (piece_of_vector[i] < local_min)
             local_min = piece_of_vector[i];
         else if (piece_of_vector[i] > local_max)
@@ -95,7 +76,6 @@ int main(int argc, char **argv)
 
     MPI_Allreduce(&local_min, &min, 1, MPI_INT, MPI_MIN, MPI_COMM_WORLD);
     MPI_Allreduce(&local_max, &max, 1, MPI_INT, MPI_MAX, MPI_COMM_WORLD);
-/*----------------------------------------------------------------------------------------------------*/
 
     /* if(rank == 0){
     printf("min = %d\n", min);
@@ -103,8 +83,6 @@ int main(int argc, char **argv)
     printf("\n\n");
     } */
 
-
-/*--------------------------COMPUTE C------------------------------------------------------------------*/
     lenC = max - min + 1;
     c_local = (int *)malloc(lenC * sizeof(int));
     for (i = 0; i < lenC; i++)
@@ -119,12 +97,27 @@ int main(int argc, char **argv)
     if (rank == 0)
         c = (int *)malloc(lenC * sizeof(int));
 
-    free(piece_of_vector);
-    free(recvcounts);
-    free(displ);
+    // // stampa di prova
+    // for (i = 0; i < lenC; i++)
+    //      printf("%d ", c_local[i]);
+    // printf("        %d", lenC);
+    // printf("\n");
 
     MPI_Reduce(c_local, c, lenC, MPI_INT, MPI_SUM, 0, MPI_COMM_WORLD);
     free(c_local);
+
+    // if (rank == 0)
+    //  {
+    //      for (i = 0; i < lenC; i++)
+    //          printf("%d ", c[i]);
+    //      printf("        %d", lenC);
+    //      printf("\n");
+    //  }
+
+    MPI_Gatherv(piece_of_vector, dim, MPI_INT, full_vector, recvcounts, displ, MPI_INT, 0, MPI_COMM_WORLD);
+    free(piece_of_vector);
+    free(recvcounts);
+    free(displ);
 
     if(rank == 0){
         for(i=0; i<N; i++){
@@ -132,10 +125,10 @@ int main(int argc, char **argv)
         }
         printf("\n\n");
     }
-/*-----------------------------------------------------------------------------------------------------*/
 
-/*CAPIRE COME FUNZIONA SU CARTA IL SEGUENTE PEZZO DI ALGORITMO NON PARALLELIZZABILE*/
-/*----------------------------------------------------------------------------------------------------*/
+
+/*CAPIRE COME FUNZIONA SU CARTA IL SEGUENTE PEZZO DI ALGORITMO*/
+/*-----------------------------------------------------------------------*/
     if (rank == 0)
     {
         int p;
@@ -152,9 +145,7 @@ int main(int argc, char **argv)
             full_vector[x] = j + min;
         }
     }
-    
-double end_counting_sort = MPI_Wtime(); //eventualmente da spostare sotto le free() quando si toglierà la stampa sottostante
-/*-----------------------------------------------------------------------------------------------------*/
+/*------------------------------------------------------------------------*/
 
     for(i=0; i<N; i++){
         printf("%d ", full_vector[i]);
