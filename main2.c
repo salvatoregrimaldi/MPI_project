@@ -31,7 +31,7 @@ int main(int argc, char **argv)
     MPI_Comm_size(MPI_COMM_WORLD, &n_ranks);
 
     // Stampa del numero di ranks
-    //printf("%d", n_ranks);
+    printf("%d", n_ranks);
 
 
 /*-----------------------------------------------INIZIALIZZAZIONE--------------------------------------*/
@@ -79,6 +79,8 @@ int main(int argc, char **argv)
 
 /*-------------------------------MIN E MAX-------------------------------------------------------------*/
     double start_counting_sort = MPI_Wtime();
+
+    /*<---------------- qui mettere una scatterv del vettore generale posseduto da proc rank0*/
 
     for (i = 0; i < dim; i++)
     {
