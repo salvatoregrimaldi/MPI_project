@@ -3,7 +3,7 @@
 #include <time.h>
 #include <mpi.h>
 #include <limits.h>
-#define N 10000 // dimensione del vettore da ordinare
+#define N 1000 // dimensione del vettore da ordinare
 
 int main(int argc, char **argv)
 {
@@ -42,7 +42,7 @@ int main(int argc, char **argv)
         full_vector = (int *)malloc(N * sizeof(int));
         // riempimento del vettore
         for (i = 0; i < N; i++)
-            full_vector[i] = rand() % 7000;
+            full_vector[i] = rand() % 700;
         for (i = 0; i < N; i++)
             printf("%d ", full_vector[i]);
         printf("\n\n");
