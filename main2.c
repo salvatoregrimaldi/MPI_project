@@ -4,6 +4,8 @@
 #include <mpi.h>
 #include <limits.h>
 #define N 1000 // dimensione del vettore da ordinare
+void init(/*int,*/ int, int, int, int*);
+
 
 int main(int argc, char **argv)
 {
@@ -25,6 +27,8 @@ int main(int argc, char **argv)
     int lenC;
     int quoz;
 
+    printf("argc = %d", argc);
+
     // inizializzazione ambiente MPI
     MPI_Init(&argc, &argv);
     MPI_Comm_rank(MPI_COMM_WORLD, &rank);
@@ -40,9 +44,20 @@ int main(int argc, char **argv)
         dim = quoz;
         // il proc. 0 alloca lo spazio necessario per l'intero vettore
         full_vector = (int *)malloc(N * sizeof(int));
+        
         // riempimento del vettore
-        for (i = 0; i < N; i++)
+        /*for (i = 0; i < N; i++)
             full_vector[i] = rand() % 700;
+        for (i = 0; i < N; i++)
+            printf("%d ", full_vector[i]);
+        printf("\n\n");*/
+    }
+
+    double start_inizializzazione = MPI_Wtime();
+    init(/*N,*/ n_ranks, quoz, rank, full_vector);
+    double end_inizializzazione = MPI_Wtime();
+
+    if(rank == 0){
         for (i = 0; i < N; i++)
             printf("%d ", full_vector[i]);
         printf("\n\n");
@@ -146,4 +161,39 @@ int main(int argc, char **argv)
 
 
     MPI_Finalize();
+}
+
+void init(/*int N,*/ int n_ranks, int quoz, int rank, int *full_vector){
+    int *recvcounts;
+    int *displ;
+    int dim;
+    int *piece_init_vect;
+    int i;
+
+    // L'inizializzazione randomica del vettore viene equamente distribuita tra i processi
+
+    if (rank >= 0 && rank < n_ranks - 1)
+        dim = quoz;
+
+    if (rank == n_ranks - 1)
+        dim = quoz + N % n_ranks;
+
+    recvcounts = (int *)malloc(n_ranks * sizeof(int));
+    displ = (int *)malloc(n_ranks * sizeof(int));
+    for (i = 0; i < n_ranks; i++)
+    {
+        displ[i] = i * quoz;
+
+        if (i == n_ranks - 1)
+            recvcounts[i] = quoz + N % n_ranks;
+        else
+            recvcounts[i] = quoz;
+    }
+
+    piece_init_vect = (int *)malloc(dim * sizeof(int));
+
+    for (i = 0; i < dim; i++)
+        piece_init_vect[i] = rand() % 700;
+    
+    MPI_Gatherv(piece_init_vect, dim, MPI_INT, full_vector, recvcounts, displ, MPI_INT, 0, MPI_COMM_WORLD);
 }
