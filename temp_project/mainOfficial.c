@@ -33,6 +33,7 @@ int main(int argc, char *argv[]){
 
     if(rank == 0){
         read_start_time = MPI_Wtime();
+        //allocazione dello spazio necessario per il vettore
         full_vector = (int *)malloc(n * sizeof(int));
     }
 
@@ -54,7 +55,7 @@ int main(int argc, char *argv[]){
         read_start_time = MPI_Wtime();
     }
 
-
+   //esecuzione dell'algoritmo di ordinamento
    countingSort(n, n_ranks, rank, full_vector);
 
 

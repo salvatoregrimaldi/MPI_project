@@ -74,9 +74,8 @@ void countingSort(int n, int n_ranks, int rank, int *full_vector){
 
     quoz = n / n_ranks;
 
-    if (rank == 0) dim = quoz;
 
-    if (rank > 0 && rank < n_ranks - 1)
+    if (rank >= 0 && rank < n_ranks - 1)
         dim = quoz;
 
     if (rank == n_ranks - 1)
@@ -100,8 +99,6 @@ void countingSort(int n, int n_ranks, int rank, int *full_vector){
     MPI_Scatterv(full_vector, sendcounts, displ, MPI_INT, piece_of_vector, sendcounts[rank], MPI_INT, 0, MPI_COMM_WORLD);
 
     /*-------------------------------MIN E MAX-------------------------------------------------------------*/
-    double start_counting_sort = MPI_Wtime();
-
     for (i = 0; i < dim; i++)
     {
         if (piece_of_vector[i] < local_min)
@@ -157,7 +154,5 @@ void countingSort(int n, int n_ranks, int rank, int *full_vector){
         }
     free(c);
     }
-
-    
 
 }
